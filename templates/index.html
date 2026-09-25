@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComicCraft AI - Anime Edition</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #38bdf8;
+            font-size: 2.5rem;
+        }
+        form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 14px;
+            border-radius: 8px;
+            border: 2px solid #334155;
+            background-color: #1e293b;
+            color: #ffffff;
+            font-size: 1rem;
+        }
+        button {
+            padding: 14px 28px;
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        button:hover {
+            background-color: #0369a1;
+        }
+        .panels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .panel-card {
+            background-color: #1e293b;
+            border: 2px solid #38bdf8;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+        .panel-card img {
+            width: 100%;
+            height: 260px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #475569;
+        }
+        .narration {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-top: 10px;
+        }
+        .dialogue {
+            font-weight: bold;
+            color: #38bdf8;
+            margin-top: 5px;
+        }
+        .pdf-btn {
+            display: block;
+            width: 220px;
+            margin: 30px auto;
+            text-align: center;
+            padding: 12px;
+            background-color: #10b981;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 ComicCraft AI Generator</h1>
+        
+        <form action="/generate" method="post">
+            <input type="text" name="prompt" placeholder="Enter your anime story prompt here..." required>
+            <button type="submit">Generate Comic</button>
+        </form>
+
+        {% if panels %}
+            <a href="{{ pdf_url }}" class="pdf-btn" download>📥 Download Comic PDF</a>
+            
+            <div class="panels-grid">
+                {% for item in panels %}
+                    <div class="panel-card">
+                        <h3>Panel {{ item.panel }}</h3>
+                        <img src="{{ item.image }}" alt="Panel {{ item.panel }}">
+                        <p class="narration">{{ item.narration }}</p>
+                        <p class="dialogue">"{{ item.dialogue }}"</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

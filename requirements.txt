@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+jinja2
+python-multipart
+pydantic
+python-dotenv
+google-generativeai
+requests
+Pillow
+fpdf2
