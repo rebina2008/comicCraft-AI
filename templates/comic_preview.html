@@ -1,9 +1,9 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ComicCraft - Your Comic Preview</title>
+    <title>ComicCraft - Preview</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -35,7 +35,7 @@
         }
         .panel-img {
             width: 100%;
-            max-height: 450px;
+            max-height: 480px;
             object-fit: cover;
             border-radius: 8px;
             margin-bottom: 15px;
@@ -45,21 +45,20 @@
             color: #555;
             font-size: 14px;
             margin-bottom: 12px;
-            line-height: 1.4;
         }
         .narration-text {
             font-size: 15px;
             color: #222;
             line-height: 1.5;
             background: #f9f9f9;
-            padding: 10px 15px;
-            border-left: 4px solid #3498db;
+            padding: 12px 15px;
+            border-left: 4px solid #0066cc;
             border-radius: 4px;
+            white-space: pre-line;
         }
         .download-container {
             text-align: center;
-            margin-top: 35px;
-            margin-bottom: 40px;
+            margin: 35px 0;
         }
         .btn-download {
             background-color: #0066cc;
@@ -67,16 +66,10 @@
             padding: 14px 28px;
             font-size: 16px;
             font-weight: bold;
-            border: none;
             border-radius: 6px;
-            cursor: pointer;
             text-decoration: none;
             display: inline-block;
             box-shadow: 0 4px 6px rgba(0, 102, 204, 0.2);
-            transition: background 0.3s ease;
-        }
-        .btn-download:hover {
-            background-color: #004999;
         }
     </style>
 </head>
@@ -89,10 +82,10 @@
     <div class="comic-panel">
         <div class="panel-title">Panel {{ panel.panel }}: {{ panel.title }}</div>
         
-        <img src="{{ panel.image_path }}" alt="Panel Image" class="panel-img">
+        <img src="{{ panel.image_path }}" alt="Anime Panel Image" class="panel-img">
         
         {% if panel.scene_description %}
-        <div class="scene-desc">{{ panel.scene_description }}</div>
+        <div class="scene-desc"><i>{{ panel.scene_description }}</i></div>
         {% endif %}
         
         <div class="narration-text">
