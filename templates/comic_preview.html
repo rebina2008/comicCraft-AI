@@ -1,0 +1,112 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComicCraft - Your Comic Preview</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .header-title {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .comic-panel {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+        .panel-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #111;
+            margin-bottom: 15px;
+        }
+        .panel-img {
+            width: 100%;
+            max-height: 450px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .scene-desc {
+            font-style: italic;
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+        .narration-text {
+            font-size: 15px;
+            color: #222;
+            line-height: 1.5;
+            background: #f9f9f9;
+            padding: 10px 15px;
+            border-left: 4px solid #3498db;
+            border-radius: 4px;
+        }
+        .download-container {
+            text-align: center;
+            margin-top: 35px;
+            margin-bottom: 40px;
+        }
+        .btn-download {
+            background-color: #0066cc;
+            color: white;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 4px 6px rgba(0, 102, 204, 0.2);
+            transition: background 0.3s ease;
+        }
+        .btn-download:hover {
+            background-color: #004999;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 class="header-title">📖 Your Comic Preview</h1>
+
+    {% for panel in layout %}
+    <div class="comic-panel">
+        <div class="panel-title">Panel {{ panel.panel }}: {{ panel.title }}</div>
+        
+        <img src="{{ panel.image_path }}" alt="Panel Image" class="panel-img">
+        
+        {% if panel.scene_description %}
+        <div class="scene-desc">{{ panel.scene_description }}</div>
+        {% endif %}
+        
+        <div class="narration-text">
+            {{ panel.text }}
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="download-container">
+        <a href="/download-pdf?pdf_path={{ pdf_path }}" class="btn-download">
+            📥 Download Your Comic as PDF
+        </a>
+    </div>
+</div>
+
+</body>
+</html>
