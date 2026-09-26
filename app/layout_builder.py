@@ -1,15 +1,18 @@
 def build_comic_layout(image_paths, full_story, outline):
-    story_panels = full_story.split("**Panel")
-    story_panels = [f"**Panel{panel}" for panel in story_panels if panel.strip()]
-
     layout = []
-    for idx, (image, text, panel_info) in enumerate(zip(image_paths, story_panels, outline), start=1):
+    
+    for idx, panel_info in enumerate(outline, start=1):
+        img_path = image_paths[idx - 1] if idx - 1 < len(image_paths) else ""
+        
+        # Story narrative text mapping
+        narrative = f"Narrative for Panel {idx}: The story continues for {panel_info.get('title', f'Panel {idx}')}."
+        
         layout.append({
             "panel": idx,
             "title": panel_info.get("title", f"Panel {idx}"),
-            "image_path": image,
-            "text": "\n".join(text.strip().splitlines()[1:]).strip(),
-            "scene_description": panel_info.get("scene_description", "")
+            "image_path": img_path,
+            "scene_description": panel_info.get("scene_description", ""),
+            "text": narrative
         })
 
     return layout

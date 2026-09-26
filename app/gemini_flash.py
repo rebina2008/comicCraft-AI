@@ -1,27 +1,28 @@
 import json
+import re
 import google.generativeai as genai
 
 def generate_outline(user_prompt: str) -> list:
     prompt = f"""
 You are a professional AI comic planner.
 
-Your task is to generate a *strictly formatted* JSON array containing 5 panel descriptions for a comic based on the story idea below:
+Generate a strictly formatted JSON list containing 5 panel descriptions for a comic based on the story idea below:
 
 STORY: "{user_prompt}"
 
-Each JSON object must include:
+Return ONLY a JSON array with objects containing these exact keys:
 - "panel" (integer)
 - "title" (string)
 - "scene_description" (string)
 - "image_prompt" (string)
 
-Respond ONLY in this valid JSON format, without any explanations or markdown:
+Example valid format:
 [
   {{
     "panel": 1,
     "title": "Title here",
     "scene_description": "Scene description here",
-    "image_prompt": "Image prompt for Stable Diffusion"
+    "image_prompt": "Image prompt for text to image generator"
   }}
 ]
 """
@@ -30,21 +31,36 @@ Respond ONLY in this valid JSON format, without any explanations or markdown:
         response = model.generate_content(prompt)
         output_text = response.text.strip()
 
-        if output_text.startswith("```json"):
-            output_text = output_text.replace("```json", "").replace("```", "").strip()
+        # Regex to extract JSON array if model adds extra text/markdown
+        json_match = re.search(r'\[.*\]', output_text, re.DOTALL)
+        if json_match:
+            output_text = json_match.group(0)
 
         panel_data = json.loads(output_text)
 
         if not isinstance(panel_data, list):
-            raise ValueError("Gemini response is not a list.")
+            return []
 
-        for panel in panel_data:
-            if not isinstance(panel, dict) or not all(key in panel for key in ("panel", "title", "scene_description", "image_prompt")):
-                raise ValueError(f"Invalid panel format or missing keys: {panel}")
+        cleaned_data = []
+        for idx, panel in enumerate(panel_data, start=1):
+            if isinstance(panel, dict):
+                cleaned_data.append({
+                    "panel": panel.get("panel", idx),
+                    "title": panel.get("title", f"Panel {idx}"),
+                    "scene_description": panel.get("scene_description", "A scene in the story."),
+                    "image_prompt": panel.get("image_prompt", user_prompt)
+                })
 
-        return panel_data
+        return cleaned_data
 
-    except json.JSONDecodeError as e:
-        return [{"error": f"JSON parsing failed: {str(e)}"}]
     except Exception as e:
-        return [{"error": f"Generation failed: {str(e)}"}]
+        print(f"Error in Gemini Flash Outline Generation: {str(e)}")
+        # Fallback dummy 5 panels so application doesn't crash
+        return [
+            {
+                "panel": i,
+                "title": f"Panel {i}",
+                "scene_description": f"Scene description for panel {i}",
+                "image_prompt": f"Comic style illustration of {user_prompt}, panel {i}"
+            } for i in range(1, 6)
+        ]

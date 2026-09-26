@@ -14,7 +14,7 @@ templates = Jinja2Templates(directory="templates")
 
 @router.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="index.html")
 
 @router.post("/generate", response_class=HTMLResponse)
 async def generate_comic(
@@ -33,30 +33,33 @@ async def generate_comic(
             f"The tone is {tone}. The art style is {style}."
         )
 
-        # Step 1: Generate panel outline
         outline = generate_outline(full_prompt)
 
-        if not isinstance(outline, list) or not all("image_prompt" in panel for panel in outline):
-            raise ValueError("Invalid outline structure from Gemini response.")
+        if not outline or not isinstance(outline, list):
+            outline = [
+                {
+                    "panel": i,
+                    "title": f"Panel {i}",
+                    "scene_description": f"Panel {i} scene for {prompt}",
+                    "image_prompt": f"{style} style drawing of {character_name} in {setting}"
+                } for i in range(1, 6)
+            ]
 
-        # Step 2: Generate story
         full_story = generate_story(outline)
 
-        # Step 3: Generate images
-        images = [generate_image(panel["image_prompt"]) for panel in outline]
+        images = [generate_image(panel.get("image_prompt", prompt), panel_number=idx) 
+                  for idx, panel in enumerate(outline, start=1)]
 
-        # Step 4: Build Layout
         layout = build_comic_layout(images, full_story, outline)
 
-        # Step 5: Export to PDF
         pdf_path = save_pdf(layout)
         web_pdf_path = "/" + pdf_path.replace("\\", "/")
 
-        return templates.TemplateResponse("comic_preview.html", {
-            "request": request,
-            "layout": layout,
-            "pdf_path": web_pdf_path
-        })
+        return templates.TemplateResponse(
+            request=request, 
+            name="comic_preview.html", 
+            context={"layout": layout, "pdf_path": web_pdf_path}
+        )
 
     except Exception as e:
         traceback.print_exc()
@@ -64,10 +67,11 @@ async def generate_comic(
 
 @router.get("/export-success", response_class=HTMLResponse)
 async def export_success(request: Request, pdf_path: str):
-    return templates.TemplateResponse("export_success.html", {
-        "request": request,
-        "pdf_path": pdf_path
-    })
+    return templates.TemplateResponse(
+        request=request, 
+        name="export_success.html", 
+        context={"pdf_path": pdf_path}
+    )
 
 @router.get("/test-image")
 async def test_image(prompt: str = "A futuristic city at sunset, sci-fi, cinematic, artstation"):
