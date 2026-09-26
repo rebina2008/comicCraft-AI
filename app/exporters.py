@@ -1,45 +1,67 @@
 import os
-from fpdf import FPDF
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image as RLImage
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib import colors
 
-def save_pdf(layout: list) -> str:
-    pdf_dir = os.path.join("static", "exports")
-    os.makedirs(pdf_dir, exist_ok=True)
+def create_comic_pdf(title: str, panels: list, output_path: str):
+    doc = SimpleDocTemplate(
+        output_path,
+        pagesize=letter,
+        rightMargin=36,
+        leftMargin=36,
+        topMargin=36,
+        bottomMargin=36
+    )
     
-    pdf_path = os.path.join(pdf_dir, "comic_export.pdf")
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'ComicTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        leading=28,
+        alignment=1,
+        textColor=colors.HexColor("#1e293b"),
+        spaceAfter=15
+    )
     
-    pdf = FPDF()
-    pdf.set_auto_page_break(auto=True, margin=15)
+    panel_title_style = ParagraphStyle(
+        'PanelTitle',
+        parent=styles['Heading2'],
+        fontSize=14,
+        leading=18,
+        textColor=colors.HexColor("#0f172a"),
+        spaceAfter=6
+    )
     
-    # Cover / Header
-    pdf.add_page()
-    pdf.set_font("Helvetica", style="B", size=22)
-    pdf.cell(0, 15, txt="ComicCraft AI - Anime Edition", ln=True, align="C")
-    pdf.ln(10)
-    
-    # Iterate through exact layout items
-    for panel in layout:
-        panel_num = panel.get("panel", 1)
-        title = panel.get("title", f"Panel {panel_num}")
-        image_path = panel.get("image_path", "")
-        description = panel.get("scene_description", "")
+    text_style = ParagraphStyle(
+        'ComicText',
+        parent=styles['Normal'],
+        fontSize=10,
+        leading=14,
+        textColor=colors.HexColor("#334155"),
+        spaceAfter=4
+    )
+
+    story = []
+    story.append(Paragraph(title, title_style))
+    story.append(Spacer(1, 10))
+
+    for panel in panels:
+        story.append(Paragraph(panel['title'], panel_title_style))
         
-        pdf.add_page()
-        pdf.set_font("Helvetica", style="B", size=15)
-        pdf.cell(0, 10, txt=f"Panel {panel_num}: {title}", ln=True, align="L")
-        pdf.ln(5)
-        
-        # Exact rendered image path from web preview is embedded here directly
-        if image_path and os.path.exists(image_path):
+        # Check local file path first for PDF inclusion
+        img_file = panel.get('local_filepath', '')
+        if img_file and os.path.exists(img_file):
             try:
-                pdf.image(image_path, x=20, y=pdf.get_y(), w=170)
-                pdf.ln(120)
+                img = RLImage(img_file, width=400, height=250)
+                story.append(img)
+                story.append(Spacer(1, 8))
             except Exception as e:
                 print(f"Error adding image to PDF: {e}")
-                pdf.ln(10)
-        
-        pdf.set_font("Helvetica", size=11)
-        pdf.multi_cell(0, 7, txt=description)
-        pdf.ln(5)
 
-    pdf.output(pdf_path)
-    return pdf_path
+        story.append(Paragraph(f"<b>Story:</b> {panel['story_text']}", text_style))
+        story.append(Paragraph(f"<b>Dialogue:</b> {panel['dialogue']}", text_style))
+        story.append(Spacer(1, 15))
+
+    doc.build(story)

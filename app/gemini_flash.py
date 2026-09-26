@@ -1,72 +1,49 @@
-import json
-import re
 import os
+import json
 from google import genai
 
-def generate_outline(user_prompt: str) -> list:
-    prompt = f"""
-You are a professional AI comic planner.
+def get_client():
+    """Fetches API key safely without crashing server at startup."""
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise ValueError("GEMINI_API_KEY environment variable is missing.")
+    return genai.Client(api_key=api_key)
 
-Generate a strictly formatted JSON list containing 5 panel descriptions for a comic based on the story idea below:
+def generate_comic_story(prompt: str) -> dict:
+    """Generates a structured 5-panel comic outline using Gemini."""
+    system_instruction = """
+    You are an expert comic book story writer. Given a prompt, return a valid JSON object with:
+    - "title": A catchy title for the comic
+    - "panels": A list of 5 objects, each having:
+        - "panel_number": int (1 to 5)
+        - "title": panel scene heading
+        - "description": visual prompt description
+        - "dialogue": text spoken in the panel
+    Return ONLY pure JSON.
+    """
 
-STORY: "{user_prompt}"
-
-Return ONLY a JSON array with objects containing these exact keys:
-- "panel" (integer)
-- "title" (string)
-- "scene_description" (string)
-- "image_prompt" (string)
-
-Example valid format:
-[
-  {{
-    "panel": 1,
-    "title": "Title here",
-    "scene_description": "Scene description here",
-    "image_prompt": "Image prompt for text to image generator"
-  }}
-]
-"""
     try:
-        client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-        
-        # Using stable/supported model string
+        client = get_client()
         response = client.models.generate_content(
-            model='gemini-1.5-flash',
-            contents=prompt,
+            model="gemini-2.5-flash",
+            contents=f"Create a 5-panel comic outline based on this idea: {prompt}",
+            config={"system_instruction": system_instruction}
         )
-        
-        output_text = response.text.strip()
 
-        json_match = re.search(r'\[.*\]', output_text, re.DOTALL)
-        if json_match:
-            output_text = json_match.group(0)
-
-        panel_data = json.loads(output_text)
-
-        if not isinstance(panel_data, list):
-            return []
-
-        cleaned_data = []
-        for idx, panel in enumerate(panel_data, start=1):
-            if isinstance(panel, dict):
-                cleaned_data.append({
-                    "panel": panel.get("panel", idx),
-                    "title": panel.get("title", f"Panel {idx}"),
-                    "scene_description": panel.get("scene_description", "A scene in the story."),
-                    "image_prompt": panel.get("image_prompt", user_prompt)
-                })
-
-        return cleaned_data
+        clean_text = response.text.replace("```json", "").replace("```", "").strip()
+        return json.loads(clean_text)
 
     except Exception as e:
-        print(f"Error in Gemini Flash Outline Generation: {str(e)}")
-        # Dynamic fallback for 5 panels if API fails
-        return [
-            {
-                "panel": i,
-                "title": f"Panel {i}",
-                "scene_description": f"Scene description for panel {i}",
-                "image_prompt": f"Anime style illustration of {user_prompt}, panel {i}"
-            } for i in range(1, 6)
-        ]
+        print(f"Error in Gemini Flash Outline Generation: {e}")
+        # Fallback response so application stays alive
+        return {
+            "title": "ComicCraft AI Adventure",
+            "panels": [
+                {
+                    "panel_number": i,
+                    "title": f"Panel {i}",
+                    "description": f"Scene {i} for prompt: {prompt}",
+                    "dialogue": "..."
+                } for i in range(1, 6)
+            ]
+        }
