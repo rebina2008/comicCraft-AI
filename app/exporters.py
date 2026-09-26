@@ -2,59 +2,46 @@ import os
 from datetime import datetime
 from fpdf import FPDF
 
-class ComicPDF(FPDF):
-    def header(self):
-        self.set_font('Arial', 'B', 16)
-        self.cell(0, 10, 'ComicCraft - AI Generated Comic', 0, 1, 'C')
-        self.ln(5)
+class PDF(FPDF):
+    pass
 
 def save_pdf(layout):
-    export_folder = os.path.join("static", "exports")
-    os.makedirs(export_folder, exist_ok=True)
-
-    pdf = ComicPDF()
+    pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
+    EXPORT_FOLDER = "static/exports"
+    os.makedirs(EXPORT_FOLDER, exist_ok=True)
 
     for panel in layout:
+        image_path = panel['image_path']
+        story_text = panel['text']
+
         pdf.add_page()
+        pdf.set_font("Arial", 'B', 14)
+        pdf.cell(0, 10, f"Panel {panel['panel']}: {panel['title']}", ln=True, align="C")
+        pdf.set_font("Arial", '', 12)
+
+        y_image = 30
+        image_height = 100
+        spacing_after_image = 15
+
+        if os.path.exists(image_path):
+            pdf.image(image_path, x=10, y=y_image, w=pdf.w - 20, h=image_height)
+        else:
+            pdf.set_y(y_image)
+            pdf.multi_cell(0, 10, f"Image missing: {image_path}")
+
+        pdf.set_y(y_image + image_height + spacing_after_image)
+        story_lines = story_text.strip().splitlines()
         
-        # Panel Title
-        pdf.set_font("Arial", "B", 14)
-        title_text = f"Panel {panel.get('panel')}: {panel.get('title', '')}"
-        safe_title = title_text.encode('latin-1', 'replace').decode('latin-1')
-        pdf.cell(0, 10, safe_title, ln=True, align="L")
-        pdf.ln(3)
+        if story_lines and story_lines[0].strip().lower().startswith("**panel"):
+            story_lines = story_lines[1:]
+            
+        cleaned_text = "\n".join(story_lines).strip()
+        pdf.multi_cell(0, 10, cleaned_text)
 
-        # Panel Image
-        image_path = panel.get("image_path", "")
-        if image_path.startswith("/"):
-            clean_img_path = image_path[1:].split("?")[0]
-        else:
-            clean_img_path = image_path.split("?")[0]
-
-        if os.path.exists(clean_img_path):
-            pdf.image(clean_img_path, x=15, y=30, w=180, h=120)
-            pdf.set_y(155)
-        else:
-            pdf.set_y(40)
-
-        # Scene Description
-        scene_desc = panel.get("scene_description", "")
-        if scene_desc:
-            pdf.set_font("Arial", "I", 10)
-            safe_scene = scene_desc.encode('latin-1', 'replace').decode('latin-1')
-            pdf.multi_cell(0, 6, safe_scene)
-            pdf.ln(3)
-
-        # Narration / Dialogue
-        story_text = panel.get("text", "")
-        pdf.set_font("Arial", "", 11)
-        safe_text = story_text.encode('latin-1', 'replace').decode('latin-1')
-        pdf.multi_cell(0, 7, safe_text)
-
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     filename = f"comic_{timestamp}.pdf"
-    pdf_path = os.path.join(export_folder, filename)
-    
+    pdf_path = os.path.join(EXPORT_FOLDER, filename)
     pdf.output(pdf_path)
+
     return pdf_path

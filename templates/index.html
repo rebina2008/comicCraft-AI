@@ -2,71 +2,56 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ComicCraft AI</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <title>ComicCraft - Create Your Comic</title>
     <style>
-        body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding-top: 40px; }
-        .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; }
-        .form-control, .form-select { background-color: #0f172a; color: #fff; border: 1px solid #475569; }
-        .form-control:focus, .form-select:focus { background-color: #0f172a; color: #fff; border-color: #38bdf8; box-shadow: none; }
-        .btn-custom { background-color: #38bdf8; color: #0f172a; font-weight: bold; }
-        .btn-custom:hover { background-color: #0284c7; color: #fff; }
+        body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        label { font-weight: bold; display: block; margin-bottom: 5px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #0066cc; color: #fff; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; }
+        button:hover { background: #0052a3; }
     </style>
 </head>
 <body>
-
-<div class="container" style="max-width: 700px;">
-    <div class="card p-4 shadow-lg">
-        <h2 class="text-center mb-4 text-info">🎨 ComicCraft AI Generator</h2>
-        
-        <form action="/generate" method="post">
-            <div class="mb-3">
-                <label class="form-label font-weight-bold">Comic Title / Main Concept</label>
-                <input type="text" name="prompt" class="form-control" placeholder="e.g. Cyberpunk Ninja Girl" required>
-            </div>
-
-            <!-- புது ஃபீல்டு: கதையைப் பற்றி விரிவாகக் கேட்க -->
-            <div class="mb-3">
-                <label class="form-label font-weight-bold">Story Details / Plot (கதை விவரங்கள்)</label>
-                <textarea name="story_details" class="form-control" rows="3" placeholder="Explain the story plot, climax, or what should happen in detail..."></textarea>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Character Name</label>
-                    <input type="text" name="character_name" class="form-control" placeholder="e.g. Akira">
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Setting / Location</label>
-                    <input type="text" name="setting" class="form-control" placeholder="e.g. Neo Tokyo">
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Tone</label>
-                    <select name="tone" class="form-select">
-                        <option value="Action-packed">Action-packed</option>
-                        <option value="Dramatic">Dramatic</option>
-                        <option value="Humorous">Humorous</option>
-                        <option value="Mystery">Mystery</option>
-                    </select>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Visual Style</label>
-                    <select name="style" class="form-select">
-                        <option value="Anime" selected>Anime Style</option>
-                        <option value="Manga Black & White">Manga Black & White</option>
-                        <option value="Comic Book">American Comic Book</option>
-                    </select>
-                </div>
-            </div>
-
-            <button type="submit" class="btn btn-custom w-100 mt-3 py-2 fs-5">🚀 Generate Comic</button>
-        </form>
-    </div>
+<div class="container">
+    <h2>✏️ Create Your Comic</h2>
+    <form action="/generate" method="post">
+        <div class="form-group">
+            <label>Story Prompt:</label>
+            <textarea name="prompt" rows="3" required>A brave fox explores an enchanted forest.</textarea>
+        </div>
+        <div class="form-group">
+            <label>Main Character Name:</label>
+            <input type="text" name="character_name" value="Free" required>
+        </div>
+        <div class="form-group">
+            <label>Setting:</label>
+            <select name="setting">
+                <option value="Forest">Forest</option>
+                <option value="School">School</option>
+                <option value="Space">Space</option>
+                <option value="City">City</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Story Tone:</label>
+            <select name="tone">
+                <option value="Dramatic">Dramatic</option>
+                <option value="Light-hearted">Light-hearted</option>
+                <option value="Funny">Funny</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Art Style:</label>
+            <select name="style">
+                <option value="Realistic">Realistic</option>
+                <option value="Anime">Anime</option>
+                <option value="Comic Book">Comic Book</option>
+            </select>
+        </div>
+        <button type="submit">Generate Comic</button>
+    </form>
 </div>
-
 </body>
 </html>

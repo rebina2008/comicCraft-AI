@@ -39,6 +39,7 @@
             object-fit: cover;
             border-radius: 8px;
             margin-bottom: 15px;
+            background-color: #eee;
         }
         .scene-desc {
             font-style: italic;
@@ -78,18 +79,18 @@
 <div class="container">
     <h1 class="header-title">📖 Your Comic Preview</h1>
 
-    {% for panel in layout %}
+    {% for item in layout %}
     <div class="comic-panel">
-        <div class="panel-title">Panel {{ panel.panel }}: {{ panel.title }}</div>
+        <div class="panel-title">Panel {{ item.panel }}: {{ item.title }}</div>
         
-        <img src="{{ panel.image_path }}" alt="Anime Panel Image" class="panel-img">
+        <img src="{{ item.image_path }}" alt="Anime Panel Image" class="panel-img">
         
-        {% if panel.scene_description %}
-        <div class="scene-desc"><i>{{ panel.scene_description }}</i></div>
+        {% if item.scene_description %}
+        <div class="scene-desc"><i>{{ item.scene_description }}</i></div>
         {% endif %}
         
         <div class="narration-text">
-            {{ panel.text }}
+            {{ item.text }}
         </div>
     </div>
     {% endfor %}
