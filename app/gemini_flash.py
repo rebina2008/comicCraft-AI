@@ -1,6 +1,7 @@
 import json
 import re
-import google.generativeai as genai
+import os
+from google import genai
 
 def generate_outline(user_prompt: str) -> list:
     prompt = f"""
@@ -27,11 +28,16 @@ Example valid format:
 ]
 """
     try:
-        model = genai.GenerativeModel("models/gemini-1.5-flash")
-        response = model.generate_content(prompt)
+        client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+        
+        # Using stable/supported model string
+        response = client.models.generate_content(
+            model='gemini-1.5-flash',
+            contents=prompt,
+        )
+        
         output_text = response.text.strip()
 
-        # Regex to extract JSON array if model adds extra text/markdown
         json_match = re.search(r'\[.*\]', output_text, re.DOTALL)
         if json_match:
             output_text = json_match.group(0)
@@ -55,12 +61,12 @@ Example valid format:
 
     except Exception as e:
         print(f"Error in Gemini Flash Outline Generation: {str(e)}")
-        # Fallback dummy 5 panels so application doesn't crash
+        # Dynamic fallback for 5 panels if API fails
         return [
             {
                 "panel": i,
                 "title": f"Panel {i}",
                 "scene_description": f"Scene description for panel {i}",
-                "image_prompt": f"Comic style illustration of {user_prompt}, panel {i}"
+                "image_prompt": f"Anime style illustration of {user_prompt}, panel {i}"
             } for i in range(1, 6)
         ]
